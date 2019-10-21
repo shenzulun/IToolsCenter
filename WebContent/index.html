@@ -1,0 +1,220 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml"> 
+<head>
+	<meta charset='utf-8' />
+	<title>统一登录(开发版)</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+  	<meta name="renderer" content="webkit|ie-stand" />  
+  	<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" /> 
+	<link rel="stylesheet" type="text/css" href="static/css/style.css" />
+	<link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css" />
+	<script type="text/javascript" src="static/js/jquery.min.js"></script>
+	<script type="text/javascript" src="static/js/bootstrap.min.js"></script>
+	<script type="text/javascript">
+
+    function openBlankWindow(target, features){
+    	var curSubWindow = window.open('about:blank', target, features);
+    	if(curSubWindow){
+    		curSubWindow.focus();
+        }
+    }    
+
+	$(document).ready(function(){		
+		adjustDivHeight();
+		$("input[type='button']").click(function(){
+            var target = "custWindow" + new Date().getTime();
+            //创建空白页面
+            createTempALink('custLinkA',target,'about:blank');    
+			var id = $(this).attr('id');
+			$.ajax({
+			   type: "POST",
+			   url: "/getUrl",
+			   data: "sysid=" + id,
+			   dataType: "json",
+			   success: function(data){
+				   var sysurl = data.sysurl;
+				   if(sysurl != null && sysurl != ""){
+					    createTempALink('custLinkB',target,sysurl);	    
+					}else{
+						$('#alert1').attr('class','alert alert-warning');
+					}
+			   },
+			   error: function (XMLHttpRequest, textStatus, errorThrown) {
+				    this; 
+				}
+			});			
+			
+		})
+
+	})	
+	
+	function createTempALink(objId,target,sysurl){
+		var tempB = document.createElement("a");
+        tempB.id = objId;
+        tempB.href = sysurl;
+        tempB.target = target;
+        document.body.appendChild(tempB);
+        document.getElementById(objId).click();
+        document.body.removeChild(tempB);  
+	}
+	
+	function windowOpen(url,target){
+    var a = document.createElement("a");
+    a.setAttribute("href", url);
+    if(target == null){
+        target = '';
+    }
+    a.setAttribute("target", target);
+    document.body.appendChild(a);
+    if(a.click){
+        a.click();
+        
+    }else{
+        try{
+            var evt = document.createEvent('Event');
+            a.initEvent('click', true, true);
+            a.dispatchEvent(evt);
+            
+        }catch(e){
+            window.open(url);
+            
+        }
+    }
+    setTimeout(removeEL(a),1000);
+    
+}
+
+	function removeEL(el){
+		document.body.removeChild(el);
+	}
+
+	function fireEvent(el,type) {  
+		  var evt;  
+		  if (document.createEvent) { // DOM Level 2 standard  
+		    evt = document.createEvent("MouseEvents");  
+		    evt.initMouseEvent(type, true, true, window,  
+		      0, 0, 0, 0, 0, false, false, false, false, 0, null);  
+		  
+		    el.dispatchEvent(evt);  
+		  } else if (el.fireEvent) { // IE  
+		    el.fireEvent('on' + type);  
+		  }  
+		}  
+
+	function addEvent(el, type, fn){
+        if(document.addEventListener){
+            el.addEventListener(type, fn, true);
+        }else if(document.attachEvent){
+            el.attachEvent("on"+type, fn);
+        }else{
+            el["on"+type] = fn;
+        }
+    }
+    
+	function click1(url){
+        var features = 'top=80,left=50,width=1180,height=768,toolbar=no,location=no,directories=0,status=1,menubar=no,scrollbars=yes,resizable=yes';              
+		
+		window.open(url,'_blank',features);
+	}	
+
+	function openPostWindow(url, target, features, closeOnLoseFocus){
+		var curSubWindow = window.open('about:blank', target, features);
+        curSubWindow.focus();
+        var a = document.createElement("a");
+        a.setAttribute("href", url);
+        a.setAttribute("target", target);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+	}
+
+	function openCustWindow(url, target, features, closeOnLoseFocus){
+	    if(closeOnLoseFocus){
+	        var curSubWindow = window.open('about:blank', target, features);
+	        curSubWindow.focus();
+	    } else {
+	        var win = window.open('about:blank', target, features);
+	        win.focus();
+	    }
+	    
+	}
+	
+	function adjustDivHeight(){
+		//初始化div高度
+		//获取页面高度				
+	    var windowHight = $(window).height();
+	    var average = windowHight / 5;
+	    if(windowHight < 800){
+	    	average = windowHight / 5.5;
+		}
+		$('input').css('height',average);
+	}
+
+	function adjustDivWidth(){
+		//初始化div高度
+		//获取页面高度				
+	    var windowWidth = $(window).width();
+	    var average = windowWidth / 6;
+	    $('.row-eq-height').css('width',average);
+		//$('input').css('width',average);
+	}
+
+	window.onresize=function(){  
+		adjustDivHeight();  
+	}  
+	
+	</script>
+</head>
+<body>
+<div id="alert1" class="alert alert-warning hidden" role="alert">
+	<strong>url未配置...</strong>
+</div>
+
+
+<div class="container" style="width: 80%">
+	<div class="row-eq-height">
+		<div class="col-xs-4" style="margin-top: 10px">
+			<input type="button" id="sys_crawler_etc" class="btn btn-lg btn-info btn-block  header1" title="爬取ETC管理系统数据" value="爬虫-ETC管理系统"/>
+		</div>
+		<div class="col-xs-4" style="margin-top: 10px">
+			<input type="button" id="sys_crm_test" class="btn btn-lg btn-success btn-block  header1"  title="" value=""/>
+		</div>
+		<div class="col-xs-4" style="margin-top: 10px">
+			<input type="button" id="sys_crm_hg" class="btn btn-lg btn-primary btn-block  header1"  title="" value=""/>
+		</div>
+	</div>
+	<div class="row-eq-height">
+		<div class="col-xs-4" style="margin-top: 10px">
+			<input type="button" id="sys_ecif_test" class="btn btn-lg btn-info btn-block  header1"  title="" value=""/>
+		</div>
+		<div class="col-xs-4" style="margin-top: 10px">
+			<input type="button" id="sys_log" class="btn btn-lg btn-success btn-block  header1"  title="" value=""/>
+		</div>
+		<div class="col-xs-4" style="margin-top: 10px">
+			<input type="button" id="sys_tools" class="btn btn-lg btn-primary btn-block  header1"  title="" value=""/>
+		</div>
+	</div>
+	<div class="row-eq-height">
+		<div class="col-xs-4" style="margin-top: 10px">
+			<input type="button" id="sys_xd_sc" class="btn btn-lg btn-info btn-block  header1"  title="" value=""/>	
+		</div>
+		<div class="col-xs-4" style="margin-top: 10px">
+			<input type="button" id="" class="btn btn-lg btn-success btn-block  header1"  title="" value=""/>
+		</div>
+		<div class="col-xs-4" style="margin-top: 10px">
+			<input type="button" id="" class="btn btn-lg btn-primary btn-block  header1"  title="" value=""/>
+		</div>
+	</div>
+</div>
+
+	
+
+
+
+<form id="form-autorun" class="form-signin" target="_blank" method="post" action="">		
+		
+</form>
+<!-- 
+<a id="a-autorun" href="" target="_blank" style="visibility: hidden;"><span id="spanId">link</span></a> 
+ -->
+</body>

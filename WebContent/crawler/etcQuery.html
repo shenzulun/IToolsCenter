@@ -1,0 +1,83 @@
+<html> 
+<head>
+    <title>ETC发行管理系统</title>
+    <#include "/common/_header.html"/>
+    <script type="text/javascript" src="/static/js/jsencrypt.js"></script>
+    <script type="text/javascript">
+                
+        $(document).ready(function(){
+            $('#sendBtn').click(function(){
+                document.getElementById('respxml').value = '';
+                var msgReq = document.getElementById('reqxml').value;
+                if (msgReq == null || msgReq == '') {
+                    alert("请求内容不能为空");
+                    return;
+                }
+                var opPwd = myEncrypt();
+                var data = {"reqMsg": msgReq, "opPwd": opPwd};
+                //var input_params = 'reqMsg:' + msgReq + ',opPwd=' + opPwd;
+                $.ajax({
+                   type: "POST",
+                   url: "/tool/etcQuery/go",
+                   contentType: "application/json;charset=utf-8",
+                   dataType: "json",
+                   data: JSON.stringify(data),
+                   success: function(data){
+                        document.getElementById('respxml').value = data.retMsg;
+                   },
+                   error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        this; 
+                    }
+                });
+            })
+
+            $('#clearTextBtn').click(function(){
+                document.getElementById('reqxml').value = '';
+                document.getElementById('respxml').value = '';
+            })
+            
+        })  
+		
+        function myEncrypt(){
+            var input = document.getElementById("password_old").value;
+            var encrypt = new JSEncrypt();
+            encrypt.setPublicKey('MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCRRjobcdpzMY7UgRP4H/7936Ui09qQndfKkzpzmKzo1X30SGI6DDScYF0o8KdP/wK/AY92/V6LL1Fw0dneRd78J9QXT9vS8k3+32a2KP0K8MmBZME9LwORR9IvARpDzTmX5+c/KWjHnPpITHtCtzIodC/8c5kIHKbVcuj44ANRWQIDAQAB');
+            var output = encrypt.encrypt(input);
+            return output;
+        }
+        
+        function toDownload(){
+            $('#form-autorun').submit();
+        }
+    </script>
+</head>
+<body>
+<div class="msg-input jumbotron" style="width: 5%; height: 90%;float:left">
+</div>  
+    
+<div class="msg-input jumbotron" style="width: 40%; height: 90%; marign-top:100px;padding-top:20px;float:left">
+    <textarea rows="45" cols="70" name="reqxml" id="reqxml" class="textarea-msg" placeholder="车牌号A&#13;&#10;车牌号B"></textarea>
+</div>
+
+<div class="msg-input jumbotron" style="float:left">
+    <br />
+    <br />
+    <br />
+    <input type="button" id="sendBtn" class="btn btn-lg btn-primary" title="运行,根据车牌号从ETC发行系统获取客户的身份证号码" value="运行"/>
+
+    <br />
+    <br />
+    <br />
+    <input type="button" id="clearTextBtn" class="btn btn-lg"  title="清空" value="清空"/>
+    <br />
+    <br />
+    <br />
+    <input type="hidden" id="password_old" value="${password_old}"/>
+</div>
+<div class="msg-input jumbotron" style="width: 40%; height: 90%; padding-top:20px;float:left">
+    <textarea rows="45" cols="70" id="respxml" name="code" class="textarea-msg" placeholder="点击运行,会根据车牌号去ETC发行系统查询对应的身份证号码"></textarea>
+</div>
+<div class="jumbotron" style="height: 90%;float:left">
+    <pre>ETC发行管理系统</pre>
+</div>  
+</body>
